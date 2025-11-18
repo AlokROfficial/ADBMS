@@ -1,0 +1,247 @@
+Lab 7 ADBMS
+
+
+create type person_obj1 as OBJECT(
+    person_id number,
+    name varchar2(100),
+    email varchar2(100)
+) 
+NOT FINAL;
+/ 
+
+create type student_obj1 under person_obj1(
+    student_id number,
+    major varchar2(100),
+    gpa number
+);
+/ 
+
+create type teacher_obj1 under person_obj1(
+    teacher_id number,
+    department  varchar2(100),
+    salary number
+);
+/ 
+
+create table people1 of person_obj1;
+create table students12 of student_obj1;
+create table teachers12 of teacher_obj1;
+
+insert into people1 values(person_obj1(1,'General Person','person@mail.com'));
+insert into people1 values(person_obj1(2,'General Person 2','person2@mail.com'));
+insert into people1 values(person_obj1(3,'General Person 3','person3@mail.com'));
+
+INSERT INTO students12 VALUES (
+    student_obj1(10, 'Student One', 'stud1@mail.com', 1001, 'Computer Science', 3.6));
+
+INSERT INTO students12 VALUES (
+    student_obj1(11, 'Student Two', 'stud2@mail.com', 1002, 'Mathematics', 3.8));
+
+INSERT INTO students12 VALUES (
+    student_obj1(12, 'Student Three', 'stud3@mail.com', 1003, 'Physics', 3.5));
+
+
+
+INSERT INTO teachers12 VALUES (
+    teacher_obj1(20, 'Teacher One', 'teach1@mail.com', 2001, 'Computer Science', 55000));
+
+INSERT INTO teachers12 VALUES (
+    teacher_obj1(21, 'Teacher Two', 'teach2@mail.com', 2002, 'Mathematics', 60000));
+
+INSERT INTO teachers12 VALUES (
+    teacher_obj1(22, 'Teacher Three', 'teach3@mail.com', 2003, 'Physics', 58000));
+
+
+1. SELECT * FROM people1;
+
+2. SELECT * FROM students12 WHERE gpa > 3.7;
+
+3. SELECT * FROM teachers12 WHERE department = 'Mathematics';
+
+4. SELECT * FROM students12 WHERE major = 'Computer Science';
+
+5. UPDATE teachers12 SET salary = 85000 WHERE teacher_id = 2001;
+
+6. UPDATE students12 SET gpa = 3.95 WHERE student_id = 1001;
+
+7. DELETE FROM teachers12 WHERE teacher_id =5;
+
+8. SELECT t.name AS teacher_name, s.name AS student_name, s.major
+   FROM teachers12 t JOIN students12 s ON s.major = 'Computer Science';
+
+
+
+PL/SQL
+-------------
+1) create or replace function calculate_area(radius in number)
+return number
+is
+area number;
+begin
+area:=3.14159*radius*radius;
+return area;
+end calculate_area;
+/
+
+select calculate_area(5) from dual;
+ --------------
+2)factorial
+
+create or replace function fact(n in int)
+return int
+is 
+result int:=1;
+begin
+for i in 1..n loop
+    result:=result*i;
+end loop;
+return result;
+end fact;
+/
+-----------------------------
+create table employee22(
+employee_id int primary key,
+first_name varchar2(50),
+last_name varchar2(50),
+salary decimal(10,2));
+
+create or replace trigger before_insert_employee
+before insert on employee22
+for each row
+begin
+if:new.salary < 1000 then
+  :new.salary:=1000;
+end if;
+end;
+/
+
+insert into employee22(employee_id,first_name,last_name,salary)
+values(1,'Alok','R',800);
+values(2,'Amrutha','kashyap',1200);
+values(3,'Vivek','R',2000);
+values(4,'Bhuvan','V',1000);
+
+select* from employee22;
+
+create or replace trigger before_update_employee_salary
+before update on employee22
+for each row
+begin
+if:new.salary<:old.salary then
+   raise_application_error(-20001,'Salary cannot be decreased');
+end if;
+end;
+/
+
+update employee2 set salary=1200 where employee_id=1;
+--------------------------
+Home work
+✅ 1. Check if a Number is Prime
+CREATE OR REPLACE FUNCTION is_prime(n NUMBER)
+RETURN VARCHAR2
+IS
+    i NUMBER := 2;
+BEGIN
+    IF n <= 1 THEN
+        RETURN 'Not Prime';
+    END IF;
+
+    WHILE i <= SQRT(n) LOOP
+        IF MOD(n, i) = 0 THEN
+            RETURN 'Not Prime';
+        END IF;
+        i := i + 1;
+    END LOOP;
+
+    RETURN 'Prime';
+END;
+/
+
+✅ 2. Find the Largest of Three Numbers
+CREATE OR REPLACE FUNCTION largest(a NUMBER, b NUMBER, c NUMBER)
+RETURN NUMBER
+IS
+BEGIN
+    RETURN GREATEST(a, b, c);
+END;
+/
+
+✅ 3. Square of a Number
+CREATE OR REPLACE FUNCTION square_num(n NUMBER)
+RETURN NUMBER
+IS
+BEGIN
+    RETURN n * n;
+END;
+/
+
+✅ 4. Generate Fibonacci Sequence (Up to n terms)
+
+(returns a string of numbers)
+
+CREATE OR REPLACE FUNCTION fibonacci(n NUMBER)
+RETURN VARCHAR2
+IS
+    a NUMBER := 0;
+    b NUMBER := 1;
+    temp NUMBER;
+    result VARCHAR2(4000) := '';
+BEGIN
+    IF n <= 0 THEN
+        RETURN 'Invalid Input';
+    END IF;
+
+    FOR i IN 1..n LOOP
+        result := result || a || ' ';
+        temp := a + b;
+        a := b;
+        b := temp;
+    END LOOP;
+
+    RETURN TRIM(result);
+END;
+/
+
+✅ 5. Sum of Digits of a Number
+CREATE OR REPLACE FUNCTION sum_of_digits(n NUMBER)
+RETURN NUMBER
+IS
+    sumd NUMBER := 0;
+    temp NUMBER := ABS(n);
+BEGIN
+    WHILE temp > 0 LOOP
+        sumd := sumd + MOD(temp, 10);
+        temp := FLOOR(temp / 10);
+    END LOOP;
+
+    RETURN sumd;
+END;
+/
+
+✅ 6. Power of a Number (a^b)
+CREATE OR REPLACE FUNCTION power_num(a NUMBER, b NUMBER)
+RETURN NUMBER
+IS
+    result NUMBER := 1;
+BEGIN
+    FOR i IN 1..b LOOP
+        result := result * a;
+    END LOOP;
+
+    RETURN result;
+END;
+/
+
+✅ 7. Check if a Number is Even or Odd
+CREATE OR REPLACE FUNCTION even_odd(n NUMBER)
+RETURN VARCHAR2
+IS
+BEGIN
+    IF MOD(n, 2) = 0 THEN
+        RETURN 'Even';
+    ELSE
+        RETURN 'Odd';
+    END IF;
+END;
+/
+
